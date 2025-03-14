@@ -7,7 +7,7 @@ from flask import Flask, request, render_template,jsonify
 import os
 app = Flask(__name__)
 # تحديد المسار إلى ملفات اللغة
-pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'  # إذا كان Tesseract مثبتًا
+pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'  # إذا كان Tesseract مثبتًا
 os.environ['TESSDATA_PREFIX'] = os.path.join(os.getcwd(), 'tessdata')
 
 @app.route('/')
