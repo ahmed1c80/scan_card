@@ -7,7 +7,7 @@ from flask import Flask, request, render_template,jsonify
 import os
 app = Flask(__name__)
 # تحديد المسار إلى ملفات اللغة
-#pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'  # إذا كان Tesseract مثبتًا
+pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'  # إذا كان Tesseract مثبتًا
 os.environ['TESSDATA_PREFIX'] = os.path.join(os.getcwd(), 'tessdata')
 
 @app.route('/')
@@ -33,4 +33,4 @@ def analyze_image():
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
