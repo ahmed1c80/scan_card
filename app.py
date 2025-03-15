@@ -47,5 +47,39 @@ def analyze_image():
         return jsonify({'error': str(e)}), 500
 
 
+
+# دالة لسرد الملفات في مسار معين
+def list_files_in_directory(path):
+    try:
+        # التحقق من وجود المسار
+        if not os.path.exists(path):
+            return None, f"المسار '{path}' غير موجود."
+        
+        # الحصول على قائمة الملفات والمجلدات
+        files = os.listdir(path)
+        return files, None
+    except Exception as e:
+        return None, str(e)
+
+# نقطة نهاية API لسرد الملفات
+@app.route('/list_files/<path:directory_path>', methods=['GET'])
+def list_files(directory_path):
+    # استبدال الشرطة المائلة العكسية بشرطة مائلة للأمام (للتأكد من توافق المسار)
+    directory_path = directory_path.replace('\\', '/')
+    
+    # سرد الملفات في المسار
+    files, error = list_files_in_directory(directory_path)
+    
+    if error:
+        return jsonify({"error": error}), 400
+    
+    return jsonify({"path": directory_path, "files": files})
+
+# صفحة HTML الرئيسية
+@app.route('/dir')
+def dir():
+    return render_template('dir.html')
+
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)

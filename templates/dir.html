@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سرد الملفات باستخدام AJAX</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>سرد الملفات في مسار معين</h1>
+    <label for="directory_path">أدخل المسار:</label>
+    <input type="text" id="directory_path" placeholder="مثال: C:/Users/YourUsername/Documents">
+    <button id="list_files_button">سرد الملفات</button>
+
+    <div id="result">
+        <h2>النتيجة:</h2>
+        <pre id="output"></pre>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#list_files_button').click(function() {
+                const directory_path = $('#directory_path').val();
+                if (!directory_path) {
+                    alert('يرجى إدخال مسار صحيح!');
+                    return;
+                }
+
+                // إرسال طلب AJAX
+                $.ajax({
+                    url: `/list_files/${encodeURIComponent(directory_path)}`,
+                    method: 'GET',
+                    success: function(response) {
+                        if (response.error) {
+                            $('#output').text(`خطأ: ${response.error}`);
+                        } else {
+                            $('#output').text(`المسار: ${response.path}\nالملفات:\n${response.files.join('\n')}`);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#output').text(`حدث خطأ: ${error}`);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
