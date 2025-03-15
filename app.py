@@ -13,7 +13,7 @@ app = Flask(__name__)
 tessdata_prefix = os.environ.get('TESSDATA_PREFIX')
 print(f"مسار ملفات اللغة (tessdata): {tessdata_prefix}")
 # جلب إصدار Tesseract
-tesseract_version = pytesseract.get_tesseract_version()
+tesseract_version = pytesseract#.get_tesseract_version()
 print(f"إصدار Tesseract المثبت: {tesseract_version}")
 
 # جلب مسار tesseract
@@ -21,7 +21,7 @@ print(f"إصدار Tesseract المثبت: {tesseract_version}")
 #print(f"مسار Tesseract: {tesseract_path}")
 #print(f'********{pytesseract.pytesseract.tesseract_cmd}')
 # تحديد المسار إلى ملفات اللغة
-pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'  # إذا كان Tesseract مثبتًا
+pytesseract.pytesseract.tesseract_cmd = r'/usr/share/tessdata'#bin/tesseract'  # إذا كان Tesseract مثبتًا
 os.environ['TESSDATA_PREFIX'] = os.path.join(os.getcwd(), 'tessdata')
 
 @app.route('/')
