@@ -5,9 +5,10 @@ import io
 import requests
 from flask import Flask, request, render_template,jsonify
 from image_base import getImage
+from flask_cors import CORS
 import os
 app = Flask(__name__)
-
+CORS(app)  # سيسمح لجميع النطاقات بالوصول
 
 
 
