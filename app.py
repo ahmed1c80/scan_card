@@ -22,21 +22,14 @@ CORS(app, resources={
 })
 @app.after_request
 def add_cors_headers(response):
-    response.headers['Access-Control-Allow-Origin'] = 'https://dcash.shamil-bkp.com'
-    response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+    response.headers['Access-Control-Allow-Origin'] ='*'
+    # 'https://dcash.shamil-bkp.com'
+    response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS,GET'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
     response.headers['Access-Control-Max-Age'] = 86400
     return response
 #CORS(app, resources={r"/analyze": {"origins": "https://dcash.shamil-bkp.com"}})
-'''
-@app.after_request
-def add_cors_headers(response):
-    print(f"*******{response}")
-    response.headers['Access-Control-Allow-Origin'] = 'https://dcash.shamil-bkp.com'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-    return response
-'''
+
 # إنشاء قارئ EasyOCR (تحديد اللغة العربية)
 #reader = easyocr.Reader(['ar'])
 
@@ -65,21 +58,53 @@ def index():
     return render_template('ready_image.html')
 
 
-@app.route('/analyze', methods=['POST', 'OPTIONS'])
+@app.route('/analyze', methods=['POST', 'OPTIONS','GET'])
 def analyze_image():
     print(f"********analyze_image {request}")
     if request.method == 'OPTIONS':
+      return jsonify({"message": "CORS allowed"}), 200
+      #res=getanalyze_image()
+      #return res
+    if request.method == 'GET':
+      json_data = request.args.get('data')
+      res=getanalyze_image_json(json_data)
+      return res
+    if request.method == 'POST':
       res=getanalyze_image()
       return res
-
         #return jsonify({'success': 'run data options'}), 200
-    res=getanalyze_image()
-    return res
+    
+    return jsonify({'error': 'لم يتم تحميل أي صورة!'}), 400
+
 
 
 
 def getanalyze_image():
     data = request.get_json()
+    if not data or 'image' not in data:
+       return jsonify({'error': 'لم يتم تحميل أي صورة!'}), 400
+
+    try:
+      #  print(f"{data['image']}")
+    # تحويل base64 إلى بايتات
+        image_data = data['image'].split(',')[1]  # إزالة الجزء الأول من base64
+        image_bytes = io.BytesIO(base64.b64decode(image_data))
+        print(image_bytes)
+        # تحويل base64 إلى صورة
+        #image_data = data['image'].split(',')[1]  # إزالة الجزء الأول من base64
+        #image = Image.open(io.BytesIO(base64.b64decode(image_data)))
+        #result = reader.readtext(image)
+        # استخراج النص باستخدام pytesseract
+        text =getImage(base64.b64decode(image_data))#,'K87444439688957')# pytesseract.image_to_string(image)
+        return text#jsonify({'text': text})
+    except Exception as e:
+        print(f"***{data}**{e}")
+        return jsonify({'error': str(e)}), 500
+ 
+ 
+ 
+def getanalyze_image_json(data):
+    #data = request.get_json()
     if not data or 'image' not in data:
        return jsonify({'error': 'لم يتم تحميل أي صورة!'}), 400
 
