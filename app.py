@@ -8,9 +8,16 @@ from image_base import getImage
 from flask_cors import CORS
 import os
 app = Flask(__name__)
-CORS(app)  # سيسمح لجميع النطاقات بالوصول
+  # سيسمح لجميع النطاقات بالوصول
+CORS(app, resources={r"/analyze": {"origins": "https://dcash.shamil-bkp.com"}})
 
-
+@app.after_request
+def add_cors_headers(response):
+    print(f"*******{response}")
+    response.headers['Access-Control-Allow-Origin'] = 'https://dcash.shamil-bkp.com'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    return response
 
 # إنشاء قارئ EasyOCR (تحديد اللغة العربية)
 #reader = easyocr.Reader(['ar'])
