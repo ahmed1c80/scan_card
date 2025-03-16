@@ -1,16 +1,34 @@
 import pytesseract
-from PIL import Image
+
+from flask import Flask, request, jsonify,render_template
+from PIL import Image, ImageDraw, ImageFont
 import base64
 import io
 import requests
-from flask import Flask, request, render_template,jsonify
-from image_base import getImage
+from upimage.image_base import getImage
+from upimage.improve import process_image_imporve
 from flask_cors import CORS
 import os
 app = Flask(__name__)
   # سيسمح لجميع النطاقات بالوصول
-CORS(app, resources={r"/analyze": {"origins": "https://dcash.shamil-bkp.com"}})
 
+CORS(app, resources={
+    r"/analyze": {
+        "origins": ["https://dcash.shamil-bkp.com", "http://localhost:*"],
+        "methods": ["POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True
+    }
+})
+@app.after_request
+def add_cors_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = 'https://dcash.shamil-bkp.com'
+    response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    response.headers['Access-Control-Max-Age'] = 86400
+    return response
+#CORS(app, resources={r"/analyze": {"origins": "https://dcash.shamil-bkp.com"}})
+'''
 @app.after_request
 def add_cors_headers(response):
     print(f"*******{response}")
@@ -18,7 +36,7 @@ def add_cors_headers(response):
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
     return response
-
+'''
 # إنشاء قارئ EasyOCR (تحديد اللغة العربية)
 #reader = easyocr.Reader(['ar'])
 
@@ -46,11 +64,15 @@ def add_cors_headers(response):
 def index():
     return render_template('ready_image.html')
 
-@app.route('/analyze', methods=['POST'])
+
+@app.route('/analyze', methods=['POST', 'OPTIONS'])
 def analyze_image():
+    if request.method == 'OPTIONS':
+
+        return '', 200
     data = request.get_json()
     if not data or 'image' not in data:
-        return jsonify({'error': 'لم يتم تحميل أي صورة!'}), 400
+       return jsonify({'error': 'لم يتم تحميل أي صورة!'}), 400
 
     try:
       #  print(f"{data['image']}")
@@ -66,29 +88,13 @@ def analyze_image():
         text =getImage(base64.b64decode(image_data))#,'K87444439688957')# pytesseract.image_to_string(image)
         return text#jsonify({'text': text})
     except Exception as e:
-        print(f"*****{e}")
+        print(f"***{data}**{e}")
         return jsonify({'error': str(e)}), 500
 
 
 
 
-def ocr_space(image_bytes, api_key,language='ara'):
-        url = "https://api.ocr.space/parse/image"
-        payload = {
-        "apikey": api_key,
-        "language": language,
-        "isOverlayRequired": False,
-        "filetype": "JPG",  # تحديد نوع الملف يدويًا إذا لزم الأمر
-        }
-        files = {"file": image_bytes}
-        response = requests.post(
-              url,
-              files=files,
-              data=payload
-              )
-        print(f"response.json()****{response.json()}")      
-        return response.json()
- 
+
  
 '''
   with open(image_path, 'rb') as image_file:
@@ -136,5 +142,23 @@ def dir():
     return render_template('dir.html')
 
 
+
+
+
+@app.route('/edit_image')
+def edit_image():
+    return render_template('edit_image.html')
+
+
+app.config['UPLOAD_FOLDER'] = 'temp'
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+@app.route('/process', methods=['POST'])
+def process_image():
+  res= process_image_imporve()
+  return res
+  
+  
+  
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)

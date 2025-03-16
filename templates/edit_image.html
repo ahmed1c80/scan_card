@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>معالجة الصور</title>
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        #preview, #processed {
+            max-width: 100%;
+            margin: 20px 0;
+            border: 2px dashed #ccc;
+        }
+        
+        .button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>تحسين جودة الصورة وإضافة النصوص</h1>
+        
+        <input type="file" id="imageInput" accept="image/*">
+        <button onclick="processImage()" class="button">معالجة الصورة</button>
+        
+        <div>
+            <h3>الصورة الأصلية</h3>
+            <img id="preview">
+        </div>
+        
+        <div>
+            <h3>الصورة المحسنة</h3>
+            <img id="processed">
+        </div>
+    </div>
+
+    <script>
+        // عرض معاينة الصورة
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                document.getElementById('preview').src = reader.result;
+            }
+            reader.readAsDataURL(e.target.files[0]);
+        });
+
+        // إرسال الصورة للخادم
+        function processImage() {
+            const file = document.getElementById('imageInput').files[0];
+            if (!file) return alert('الرجاء اختيار صورة أولاً');
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            fetch('/process', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) return alert(data.error);
+                document.getElementById('processed').src = data.image_url;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء المعالجة');
+            });
+        }
+    </script>
+</body>
+</html>

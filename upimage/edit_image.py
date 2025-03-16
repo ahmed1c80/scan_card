@@ -22,7 +22,23 @@ def ocr_space(image_path, api_key, language='ara'):
             data={"apikey": api_key, "language": language}
         )
     return response.json()
-
+def ocr_space2(image_bytes, api_key,language='ara'):
+        url = "https://api.ocr.space/parse/image"
+        payload = {
+        "apikey": api_key,
+        "language": language,
+        "isOverlayRequired": False,
+        "filetype": "JPG",  # تحديد نوع الملف يدويًا إذا لزم الأمر
+        }
+        files = {"file": image_bytes}
+        response = requests.post(
+              url,
+              files=files,
+              data=payload
+              )
+        print(f"response.json()****{response.json()}")      
+        return response.json()
+ 
 # الخطوات الرئيسية
 if __name__ == "__main__":
     # تقليل حجم الصورة
@@ -35,6 +51,8 @@ if __name__ == "__main__":
     # استخدام OCR.space
     api_key = 'YOUR_OCR_SPACE_API_KEY'  # استبدل هذا بمفتاح API الخاص بك
     result = ocr_space('compressed_image.jpg', api_key)
+
+
 
     # طباعة النتيجة
     print(result)
