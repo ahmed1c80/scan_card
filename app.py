@@ -67,9 +67,10 @@ def index():
 
 @app.route('/analyze', methods=['POST', 'OPTIONS'])
 def analyze_image():
+    print(f"********analyze_image {request}")
     if request.method == 'OPTIONS':
 
-        return '', 200
+        return jsonify({'success': 'run data options'}), 200
     data = request.get_json()
     if not data or 'image' not in data:
        return jsonify({'error': 'لم يتم تحميل أي صورة!'}), 400
