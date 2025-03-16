@@ -4,7 +4,7 @@ import base64
 import io
 import requests
 from flask import Flask, request, render_template,jsonify
-#import easyocr
+from image_base import getImage
 import os
 app = Flask(__name__)
 
@@ -45,17 +45,18 @@ def analyze_image():
         return jsonify({'error': 'لم يتم تحميل أي صورة!'}), 400
 
     try:
-      
+      #  print(f"{data['image']}")
     # تحويل base64 إلى بايتات
         image_data = data['image'].split(',')[1]  # إزالة الجزء الأول من base64
         image_bytes = io.BytesIO(base64.b64decode(image_data))
+        print(image_bytes)
         # تحويل base64 إلى صورة
         #image_data = data['image'].split(',')[1]  # إزالة الجزء الأول من base64
         #image = Image.open(io.BytesIO(base64.b64decode(image_data)))
         #result = reader.readtext(image)
         # استخراج النص باستخدام pytesseract
-        text =ocr_space(image_bytes,'K87444439688957')# pytesseract.image_to_string(image)
-        return jsonify({'text': text})
+        text =getImage(base64.b64decode(image_data))#,'K87444439688957')# pytesseract.image_to_string(image)
+        return text#jsonify({'text': text})
     except Exception as e:
         print(f"*****{e}")
         return jsonify({'error': str(e)}), 500
@@ -65,11 +66,19 @@ def analyze_image():
 
 def ocr_space(image_bytes, api_key,language='ara'):
         url = "https://api.ocr.space/parse/image"
+        payload = {
+        "apikey": api_key,
+        "language": language,
+        "isOverlayRequired": False,
+        "filetype": "JPG",  # تحديد نوع الملف يدويًا إذا لزم الأمر
+        }
+        files = {"file": image_bytes}
         response = requests.post(
               url,
-              files={"file": image_bytes},
-              data={"apikey": api_key, "language": language}
+              files=files,
+              data=payload
               )
+        print(f"response.json()****{response.json()}")      
         return response.json()
  
  

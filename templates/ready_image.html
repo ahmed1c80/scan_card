@@ -18,7 +18,7 @@
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 
 
-<script sr="https://cdn.jsdelivr.net/gh/c-kick/mobileConsole/hnl.mobileconsole.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/c-kick/mobileConsole/hnl.mobileconsole.min.js"></script>
 
 
 <style>
@@ -167,7 +167,9 @@ a, a:hover, a:focus {
         
         {% include 'accounts/face.html' %}
 {% include 'accounts/signatur.html' %}
-
+<div id="containsKeyword">
+  result
+</div>
 
 {% include 'accounts/terms.html' %}
 
@@ -197,11 +199,11 @@ a, a:hover, a:focus {
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.5/dist/tesseract.min.js"></script>
     
     
-    <div style="display:none">
+    <div style="display:non">
         
 
     
-    <pre id="result"></pre>
+    <pre id="result">tt</pre>
 
      </div>
      
@@ -328,11 +330,22 @@ try{
                     // عند اكتمال التحميل
                     xhr.onload = function() {
                     // const response = JSON.parse(xhr.responseText);
-                      alert(xhr.responseText);
+                    
+                    
+    
+                     // alert(response.text);
                         if (xhr.status === 200) {
                            const response = JSON.parse(xhr.responseText);
-                        var  text=response.text;
-                            $('.res_fro').html(text);
+                            var  text=displayResults(response);
+                       // var  text=response.IsErroredOnProcessing;
+                        
+                        res_front.classList.remove('is-valid');
+                res_front.classList.add('is-invalid');
+                res_front.textContent = '✖';
+                res_front.className = 'text-danger fas fa-times'; // رمز الخطأ
+//$('.res_fro').html(xhr.responseText+"/"+xhr.status+"/"+text);
+    is_run_front=false;
+                          $('.res_fro').html(text);
                     
                         // عرض شريط التحميل
 loadingIndicatorfront.classList.add("progress_hidden");
@@ -342,7 +355,14 @@ const lowercaseText = text.toLowerCase();
 // التحقق مما إذا كان أي من الكلمات في المصفوفة موجودًا في النص
 const containsKeyword = identityAndPassportKeywords.some(keyword => lowercaseText.includes(keyword.toLowerCase()));
 
+// استخراج الكلمات الموجودة فعليًا في النص
+const matchingKeywords = identityAndPassportKeywords.filter(keyword => 
+  lowercaseText.includes(keyword.toLowerCase())
+);
+
+console.log(matchingKeywords); // ["keyword1", "keyword3"] (مثال للنتيجة)
 if (containsKeyword) {
+  $('#containsKeyword').html(containsKeyword+"")
     console.log("Success: The text contains a valid keyword.");
     res_front.classList.remove('is-invalid');
                 res_front.classList.add('is-valid');
@@ -359,7 +379,7 @@ if (containsKeyword) {
     is_run_front=false;
 }
 
-                    document.getElementById('result').textContent = lowercaseText || "No text detected.";
+                //   document.getElementById('result').textContent = lowercaseText || "No text detected.";
                           
                           
                           
@@ -509,7 +529,6 @@ loadingIndicatorfront.classList.add("progress_hidden");
 
 // التحقق مما إذا كان أي من الكلمات في المصفوفة موجودًا في النص
 const containsKeyword = identityAndPassportKeywords.some(keyword => lowercaseText.includes(keyword.toLowerCase()));
-
 if (containsKeyword) {
     console.log("Success: The text contains a valid keyword.");
     res_passport.classList.remove('is-invalid');
@@ -559,7 +578,35 @@ loadingIndicatorpassport.classList.add("progress_hidden");
         }
     }
 </script>
+<script>
+  
+        // دالة لتنظيم النص
+        function processOCRText(text) {
+            return text
+                .split('\r\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0);
+        }
 
+        // دالة لعرض النتائج
+        function displayResults(ocrResult) {
+            const outputDiv = document.getElementById('result');
+            const parsedText = ocrResult.ParsedResults[0].ParsedText;
+            const lines = processOCRText(parsedText);
+
+            let html = '';
+            lines.forEach(line => {
+                if (line.match(/AM \d+:\d+/)) {
+                    html += `<div class="timestamp">${line}</div>`;
+                } else {
+                    html += `<div class="message-text">${line}</div>`;
+                }
+            });
+
+            outputDiv.innerHTML = html;
+            return parsedText;
+        }
+</script>
     <script>
         
         document.addEventListener("DOMContentLoaded", function () {
