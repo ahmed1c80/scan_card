@@ -69,8 +69,16 @@ def index():
 def analyze_image():
     print(f"********analyze_image {request}")
     if request.method == 'OPTIONS':
+      res=getanalyze_image()
+      return res
 
-        return jsonify({'success': 'run data options'}), 200
+        #return jsonify({'success': 'run data options'}), 200
+    res=getanalyze_image()
+    return res
+
+
+
+def getanalyze_image():
     data = request.get_json()
     if not data or 'image' not in data:
        return jsonify({'error': 'لم يتم تحميل أي صورة!'}), 400
@@ -91,11 +99,6 @@ def analyze_image():
     except Exception as e:
         print(f"***{data}**{e}")
         return jsonify({'error': str(e)}), 500
-
-
-
-
-
  
 '''
   with open(image_path, 'rb') as image_file:
