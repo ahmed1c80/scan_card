@@ -24,7 +24,7 @@ CORS(app, resources={
 def add_cors_headers(response):
     response.headers['Access-Control-Allow-Origin'] ='*'
     # 'https://dcash.shamil-bkp.com'
-    response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS,GET'
+    response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS,GET,HEAD'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
     response.headers['Access-Control-Max-Age'] = 86400
     return response
@@ -62,6 +62,8 @@ def index():
 def analyze_image():
     print(f"********analyze_image {request}")
     if request.method == 'OPTIONS':
+      return jsonify({"message": "CORS allowed"}), 200
+    if request.method == 'HEAD':
       return jsonify({"message": "CORS allowed"}), 200
       #res=getanalyze_image()
       #return res
@@ -190,4 +192,4 @@ def process_image():
   
   
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False)
