@@ -11,15 +11,40 @@ from flask_cors import CORS
 import os
 app = Flask(__name__)
   # سيسمح لجميع النطاقات بالوصول
-
 CORS(app, resources={
     r"/analyze": {
-        "origins": ["https://dcash.shamil-bkp.com", "http://localhost:*"],
+        "origins": "*",  # مسموح هنا لأن supports_credentials=False (افتراضيًا)
+        "methods": ["POST", "OPTIONS", "GET", "HEAD"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    },
+    r"/process": {
+        "origins": "*",
+        "methods": ["POST", "OPTIONS", "GET", "HEAD"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
+'''
+CORS(app, resources={
+    r"/analyze": {
+        "origins": ["https://dcash.shamil-bkp.com", "*"],
+        "methods": ["POST", "OPTIONS","GET","HEAD"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True
+    },r"/process": {
+        "origins": ["https://dcash.shamil-bkp.com", "*"],
         "methods": ["POST", "OPTIONS","GET","HEAD"],
         "allow_headers": ["Content-Type", "Authorization"],
         "supports_credentials": True
     }
 })
+'''
+import logging
+
+@app.before_request
+def log_request():
+    app.logger.info(f"Request Headers: {request.headers}")
+    app.logger.info(f"Request Body: {request.get_data()}")
+  
 @app.after_request
 def add_cors_headers(response):
     response.headers['Access-Control-Allow-Origin'] ='*'
@@ -65,13 +90,14 @@ def analyze_image():
       return jsonify({"message": "CORS allowed"}), 200
     if request.method == 'HEAD':
       return jsonify({"message": "CORS allowed"}), 200
-      #res=getanalyze_image()
-      #return res
+      res=getanalyze_image()
+      return res
     if request.method == 'GET':
       json_data = request.args.get('data')
       res=getanalyze_image_json(json_data)
       return res
     if request.method == 'POST':
+      #return jsonify({"message": "CORS allowed post"}), 200
       res=getanalyze_image()
       return res
         #return jsonify({'success': 'run data options'}), 200
@@ -83,25 +109,26 @@ def analyze_image():
 
 def getanalyze_image():
     data = request.get_json()
+    #return data
     if not data or 'image' not in data:
        return jsonify({'error': 'لم يتم تحميل أي صورة!'}), 400
 
     try:
-      #  print(f"{data['image']}")
+        #print(f"{data['image']}")
     # تحويل base64 إلى بايتات
         image_data = data['image'].split(',')[1]  # إزالة الجزء الأول من base64
-        image_bytes = io.BytesIO(base64.b64decode(image_data))
-        print(image_bytes)
+        #image_bytes = io.BytesIO(base64.b64decode(image_data))
+        #print(f"*******{base64.b64decode(image_data)}")
         # تحويل base64 إلى صورة
         #image_data = data['image'].split(',')[1]  # إزالة الجزء الأول من base64
         #image = Image.open(io.BytesIO(base64.b64decode(image_data)))
         #result = reader.readtext(image)
         # استخراج النص باستخدام pytesseract
         text =getImage(base64.b64decode(image_data))#,'K87444439688957')# pytesseract.image_to_string(image)
-        return text#jsonify({'text': text})
+        return jsonify({'text': text})
     except Exception as e:
-        print(f"***{data}**{e}")
-        return jsonify({'error': str(e)}), 500
+        print(f"**data*{data}**{e}")
+        return jsonify({'error': f"{str(e)} 106"}), 500
  
  
  
@@ -192,4 +219,4 @@ def process_image():
   
   
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)

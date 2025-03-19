@@ -37,7 +37,7 @@ def getImage(original_bytes):
     # قراءة الصورة الأصلية كبايتات (مثال)
     #with open("1000423999.jpg", "rb") as f:
         #original_bytes = f.read()
-
+  try:
     # ضغط الصورة
     compressed_bytes = compress_image_bytes(original_bytes, quality=70)
 
@@ -49,3 +49,7 @@ def getImage(original_bytes):
         return result
     else:
         print("Failed to compress image.")
+        return jsonify({'error': "Failed to compress image. 52"}), 500
+  except Exception as e:
+        print(f"***{data}**{e}")
+        return jsonify({'error': f"{str(e)} img_bas 55"}), 500
